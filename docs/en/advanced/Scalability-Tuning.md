@@ -40,9 +40,6 @@ the following properties. The actual thread count depends on the maximum concurr
 cluster. For example, if spawning `10000` concurrent tasks (clients) each with a client thread
 pool size of `4`, set the master thread pool max to greater than `40000`.
 
-TODO: wait aren't these properties for this master <-> worker communication, not master <-> client communication?
-and the latter is covered in Block thread pool size under Performance Tuning so i'm thoroughly confused
-
 ```properties
 alluxio.master.worker.threads.max=51200
 alluxio.master.worker.threads.min=25600
@@ -58,15 +55,14 @@ An exception message like `java.lang.OutOfMemoryError: unable to create new nati
 indicates that operating system limits may need tuning.
 
 Several parameters limit the number of threads that a process can spawn:
-TODO: how does one configure the first two???
-- `kernel.pid_max`
-- `vm.max_map_count`
+- `kernel.pid_max`: Run `sysctl -w kernel.pid_max=<new value>`
+- `vm.max_map_count`: Run command `sysctl -w vm.max_map_count=<new value>`
 - Max user process limit: `ulimit -u`
 - Max open files limit: `ulimit -n`
 
 These limits are often set for the particular user that launch the Alluxio process.
-As a rule of thumb, `vm.max_map_count` should be at least twice the limit for master threads.
-TODO: twice the limit for master threads, so what determines the limit for master threads???
+As a rule of thumb, `vm.max_map_count` should be at least twice the limit for master threads
+as set by `alluxio.master.worker.threads.max`.
 
 ### Heartbeat Intervals and Timeouts
 
@@ -79,11 +75,12 @@ Increase the interval to reduce the number of heartbeat checks.
 ### Heartbeat Intervals and Timeouts
 
 The frequency in which a worker checks in with the master is set by the following properties:
-TODO: I feel like there should be an explanation on why there's two separate heartbeat intervals...
 ```properties
-alluxio.worker.block.heartbeat.interval.ms=60s
-alluxio.worker.filesystem.heartbeat.interval.ms=60s
+alluxio.worker.block.heartbeat.interval=60s
+alluxio.worker.filesystem.heartbeat.interval=60s
 ```
+The first one controls the heartbeat intervals for block service in Alluxio and the second one for 
+filesystem service.
 Again, increase the interval to reduce the number of heartbeat checks.
 
 ## Alluxio Client Configuration
@@ -94,20 +91,26 @@ The following properties tune RPC retry intervals:
 
 ```properties
 alluxio.user.rpc.retry.max.duration=2min
-alluxio.user.rpc.retry.base.sleep.ms=1s
+alluxio.user.rpc.retry.base.sleep=1s
 ```
-TODO: `alluxio.user.rpc.retry.base.sleep.ms` is awkwardly named if it takes a duration and not a number of ms as the value? is this correct?
 
 The retry duration and sleep duration should be increased if frequent timeouts are observed
 when a client attempts to communicate with the Alluxio master.
 
 ### Thread Pool Size
 
-The size of the client thread pool for block and file operations are configured by the following properties:
+On a single client, the number of threads connecting to the master is configured by the
+`alluxio.user.block.master.client.threads` and `alluxio.user.file.master.client.threads` properties,
+each with a default value of `10`.
+The size of the master thread pool that serves connections to clients should be tuned to match
+the maximum number of concurrrent client connections.
+For example, if the master expects up to 100 clients, each with the default number of connections,
+the master's thread pool should be configured to be at least `100 * 10 * 2 = 2000`.
+
+Consider reducing these values if the master is not responsive
+as it is possible that the master thread pool is completely drained:
 
 ```properties
 alluxio.user.block.master.client.threads=5
 alluxio.user.file.master.client.threads=5
 ```
-
-Consider reducing these values if the master is not responsive, as it is possible that the master thread pool is completely drained.
