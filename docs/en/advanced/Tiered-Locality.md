@@ -102,7 +102,7 @@ alluxio.locality.node=node_name
 alluxio.locality.rack=rack_name
 ```
 
-See the [Configuration-Settings]({{ site.baseurl }}{% link en/basic/Configuration-Settings.md %})
+See the [Configuration-Settings]({{ '/en/basic/Configuration-Settings.html' | relativize_url }})
 for the different ways to set configuration properties.
 
 ### Custom locality script name
@@ -131,4 +131,3 @@ The order of precedence obtaining this value, from highest priority to lowest pr
 1. When clients choose which worker to read from when multiple Alluxio workers hold a block
 1. If using the `LocalFirstPolicy` or `LocalFirstAvoidEvictionPolicy`, clients use tiered locality
 to choose which worker to write to when writing data to Alluxio
-
