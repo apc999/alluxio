@@ -1,8 +1,8 @@
 [![logo](docs/resources/alluxio_logo.png "Alluxio")](https://www.alluxio.org)
 
+[![Slack](https://img.shields.io/badge/slack-alluxio-blue.svg?logo=slack)](https://www.alluxio.org/slack)
 [![Release](https://img.shields.io/github/release/alluxio/alluxio/all.svg)](https://www.alluxio.org/download)
 [![Docker Pulls](https://img.shields.io/docker/pulls/alluxio/alluxio.svg)](https://hub.docker.com/r/alluxio/alluxio)
-[![Slack](https://img.shields.io/badge/slack-alluxio-blue.svg?logo=slack)](https://www.alluxio.org/slack)
 [![Documentation](https://img.shields.io/badge/docs-reference-blue.svg)](https://www.alluxio.org/docs)
 [![Twitter Follow](https://img.shields.io/twitter/follow/alluxio.svg?label=Follow&style=social)](https://twitter.com/intent/follow?screen_name=alluxio)
 [![License](https://img.shields.io/github/license/alluxio/alluxio.svg)](https://github.com/Alluxio/alluxio/blob/master/LICENSE)
