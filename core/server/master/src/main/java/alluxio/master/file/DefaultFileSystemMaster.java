@@ -2045,7 +2045,8 @@ public final class DefaultFileSystemMaster extends CoreMaster implements FileSys
 
     // Check options and determine if we should schedule async persist. This is helpful for compute
     // frameworks that use rename as a commit operation.
-    if (context.getPersist() && srcInode.isFile() && !srcInode.isPersisted()) {
+    if (context.getPersist() && srcInode.isFile() && !srcInode.isPersisted()
+        && shouldPersistPath(dstInodePath.toString())) {
       mInodeTree.updateInode(rpcContext, UpdateInodeEntry.newBuilder()
           .setId(srcInode.getId())
           .setPersistenceState(PersistenceState.TO_BE_PERSISTED.name())
@@ -2059,6 +2060,20 @@ public final class DefaultFileSystemMaster extends CoreMaster implements FileSys
           persistenceWaitTime,
           ServerConfiguration.getMs(PropertyKey.MASTER_PERSISTENCE_MAX_TOTAL_WAIT_TIME_MS)));
     }
+  }
+
+  private static final List<String> PERSISTENCE_BLACKLIST =
+      ServerConfiguration.getList(PropertyKey.MASTER_PERSISTENCE_BLACKLIST, ",");
+
+  private boolean shouldPersistPath(String path) {
+    for (String pattern : PERSISTENCE_BLACKLIST) {
+      if (path.contains(pattern)) {
+        LOG.debug("Not persisting path {} because it is in PERSISTENC_BLACKLIST {}",
+            path, PERSISTENCE_BLACKLIST);
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -3151,14 +3166,16 @@ public final class DefaultFileSystemMaster extends CoreMaster implements FileSys
       throw new InvalidPathException(
           "Cannot persist an incomplete Alluxio file: " + inodePath.getUri());
     }
-    mInodeTree.updateInode(rpcContext, UpdateInodeEntry.newBuilder().setId(inode.getId())
+    if (shouldPersistPath(inodePath.toString())) {
+      mInodeTree.updateInode(rpcContext, UpdateInodeEntry.newBuilder().setId(inode.getId())
         .setPersistenceState(PersistenceState.TO_BE_PERSISTED.name()).build());
-    mPersistRequests.put(inode.getId(),
+      mPersistRequests.put(inode.getId(),
         new alluxio.time.ExponentialTimer(
-            ServerConfiguration.getMs(PropertyKey.MASTER_PERSISTENCE_INITIAL_INTERVAL_MS),
-            ServerConfiguration.getMs(PropertyKey.MASTER_PERSISTENCE_MAX_INTERVAL_MS),
-            context.getPersistenceWaitTime(),
-            ServerConfiguration.getMs(PropertyKey.MASTER_PERSISTENCE_MAX_TOTAL_WAIT_TIME_MS)));
+          ServerConfiguration.getMs(PropertyKey.MASTER_PERSISTENCE_INITIAL_INTERVAL_MS),
+          ServerConfiguration.getMs(PropertyKey.MASTER_PERSISTENCE_MAX_INTERVAL_MS),
+          context.getPersistenceWaitTime(),
+          ServerConfiguration.getMs(PropertyKey.MASTER_PERSISTENCE_MAX_TOTAL_WAIT_TIME_MS)));
+    }
   }
 
   /**
