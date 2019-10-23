@@ -106,7 +106,7 @@ public class GrpcManagedChannelPool {
       managedChannel.shutdownNow();
     }
     Verify.verify(managedChannel.isShutdown());
-    LOG.debug("Shut down managed channel. ChannelKey: {}", channelKey);
+    LOG.info("Shut down managed channel. ChannelKey: {}", channelKey);
   }
 
   private boolean waitForChannelReady(ManagedChannel managedChannel, long healthCheckTimeoutMs) {
