@@ -204,6 +204,7 @@ public final class FileSystemContext implements Closeable {
    */
   private FileSystemContext() {
     mId = IdUtils.createFileSystemContextId();
+    LOG.info("Created new FS-context: {}", mId);
   }
 
   /**
@@ -246,6 +247,7 @@ public final class FileSystemContext implements Closeable {
 
   private synchronized void closeContext() throws IOException {
     if (!mClosed.get()) {
+      LOG.info("Closing FS-context: {}", mId);
       // Setting closed should be the first thing we do because if any of the close operations
       // fail we'll only have a half-closed object and performing any more operations or closing
       // again on a half-closed object can possibly result in more errors (i.e. NPE). Setting
