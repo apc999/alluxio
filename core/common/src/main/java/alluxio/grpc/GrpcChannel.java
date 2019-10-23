@@ -23,6 +23,8 @@ import io.grpc.ForwardingClientCallListener;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import io.grpc.Status;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Supplier;
 
@@ -31,6 +33,7 @@ import java.util.function.Supplier;
  * {@link GrpcServer}.
  */
 public final class GrpcChannel extends Channel {
+  private static final Logger LOG = LoggerFactory.getLogger(GrpcChannel.class);
   private final GrpcManagedChannelPool.ChannelKey mChannelKey;
   private Supplier<Boolean> mChannelHealthState;
   private Channel mChannel;
@@ -96,6 +99,7 @@ public final class GrpcChannel extends Channel {
    * Shuts down the channel.
    */
   public void shutdown() {
+    LOG.info("Shutting down channel: {}", mChannelKey);
     if (mAuthCloseCallback != null) {
       // Stop authenticated session with server.
       mAuthCloseCallback.run();
