@@ -25,14 +25,11 @@ import alluxio.client.file.FileSystemContext;
 import alluxio.client.file.options.InStreamOptions;
 import alluxio.client.file.options.OutStreamOptions;
 import alluxio.collections.Pair;
-import alluxio.conf.PropertyKey;
 import alluxio.exception.ExceptionMessage;
 import alluxio.exception.PreconditionMessage;
 import alluxio.exception.status.ResourceExhaustedException;
 import alluxio.exception.status.UnavailableException;
 import alluxio.network.TieredIdentityFactory;
-import alluxio.refresh.RefreshPolicy;
-import alluxio.refresh.TimeoutRefresh;
 import alluxio.resource.CloseableResource;
 import alluxio.util.FormatUtils;
 import alluxio.wire.BlockInfo;
@@ -69,11 +66,6 @@ public final class AlluxioBlockStore {
   private final FileSystemContext mContext;
   private final TieredIdentity mTieredIdentity;
 
-  /** Cached map for workers. */
-  private List<BlockWorkerInfo> mWorkerInfoList = null;
-  /** The policy to refresh workers list. */
-  private final RefreshPolicy mWorkerRefreshPolicy;
-
   /**
    * Creates an Alluxio block store with default local hostname.
    *
@@ -95,9 +87,6 @@ public final class AlluxioBlockStore {
   AlluxioBlockStore(FileSystemContext context, TieredIdentity tieredIdentity) {
     mContext = context;
     mTieredIdentity = tieredIdentity;
-    mWorkerRefreshPolicy =
-        new TimeoutRefresh(mContext.getClusterConf()
-            .getMs(PropertyKey.USER_WORKER_LIST_REFRESH_INTERVAL));
   }
 
   /**
@@ -117,22 +106,14 @@ public final class AlluxioBlockStore {
    * @return the info of all block workers eligible for reads and writes
    */
   public synchronized List<BlockWorkerInfo> getEligibleWorkers() throws IOException {
-    if (mWorkerInfoList == null || mWorkerRefreshPolicy.attempt()) {
-      mWorkerInfoList = getAllWorkers();
-    }
-    return mWorkerInfoList;
+    return mContext.getEligibleWorkers();
   }
 
   /**
    * @return the info of all block workers
    */
   public List<BlockWorkerInfo> getAllWorkers() throws IOException {
-    try (CloseableResource<BlockMasterClient> masterClientResource =
-        mContext.acquireBlockMasterClientResource()) {
-      return masterClientResource.get().getWorkerInfoList().stream()
-          .map(w -> new BlockWorkerInfo(w.getAddress(), w.getCapacityBytes(), w.getUsedBytes()))
-          .collect(toList());
-    }
+    return mContext.getAllWorkers();
   }
 
   /**
