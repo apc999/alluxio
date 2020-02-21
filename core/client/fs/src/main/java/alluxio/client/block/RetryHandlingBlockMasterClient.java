@@ -25,10 +25,14 @@ import alluxio.grpc.ServiceType;
 import alluxio.grpc.WorkerLostStorageInfo;
 import alluxio.master.MasterClientContext;
 import alluxio.grpc.GrpcUtils;
+import alluxio.util.ThreadUtils;
 import alluxio.wire.BlockInfo;
 import alluxio.wire.BlockMasterInfo;
 import alluxio.wire.BlockMasterInfo.BlockMasterInfoField;
 import alluxio.wire.WorkerInfo;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,6 +48,8 @@ import javax.annotation.concurrent.ThreadSafe;
 @ThreadSafe
 public final class RetryHandlingBlockMasterClient extends AbstractMasterClient
     implements BlockMasterClient {
+  private static final Logger LOG = LoggerFactory.getLogger(RetryHandlingBlockMasterClient.class);
+
   private BlockMasterClientServiceGrpc.BlockMasterClientServiceBlockingStub mClient = null;
 
   /**
@@ -77,6 +83,8 @@ public final class RetryHandlingBlockMasterClient extends AbstractMasterClient
 
   @Override
   public List<WorkerInfo> getWorkerInfoList() throws IOException {
+    LOG.info("enter getWorkerInfoList, stackTrace: {}",
+        ThreadUtils.formatStackTrace(Thread.currentThread()));
     return retryRPC(() -> {
       List<WorkerInfo> result = new ArrayList<>();
       for (alluxio.grpc.WorkerInfo workerInfo : mClient
@@ -115,6 +123,8 @@ public final class RetryHandlingBlockMasterClient extends AbstractMasterClient
    * @return the {@link BlockInfo}
    */
   public BlockInfo getBlockInfo(final long blockId) throws IOException {
+    LOG.info("enter getBlockInfo (blockId={}), stackTrace: {}", blockId,
+        ThreadUtils.formatStackTrace(Thread.currentThread()));
     return retryRPC(() -> {
       return GrpcUtils.fromProto(
           mClient.getBlockInfo(GetBlockInfoPRequest.newBuilder().setBlockId(blockId).build())
