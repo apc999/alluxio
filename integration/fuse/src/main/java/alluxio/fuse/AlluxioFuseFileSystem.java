@@ -621,7 +621,18 @@ public final class AlluxioFuseFileSystem extends FuseStubFS {
         nread = 0;
       } else if (nread > 0) {
         buf.put(0, dest, 0, nread);
+        boolean flagged = true;
+        for (int i = 0; i < sz; i++) {
+          if (dest[i] != 0) {
+            flagged = false;
+            break;
+          }
+        }
+        if (flagged) {
+          LOG.error("read(file={},offset={},size={}): all bytes zero", path, offset, size);
+        }
       }
+
     } catch (Throwable t) {
       LOG.error("Failed to read file {}", path, t);
       return AlluxioFuseUtils.getErrorCode(t);
