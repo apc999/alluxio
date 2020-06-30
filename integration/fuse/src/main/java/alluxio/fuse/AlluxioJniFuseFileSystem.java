@@ -214,9 +214,12 @@ public final class AlluxioJniFuseFileSystem extends AbstractFuseFileSystem {
       long cachedBytes =
           MetricsSystem.meter(MetricKey.CLIENT_CACHE_BYTES_READ_CACHE.getName()).getCount();
       long missedBytes =
+          MetricsSystem.meter(MetricKey.CLIENT_CACHE_BYTES_REQUESTED_EXTERNAL.getName()).getCount();
+      long requestedBytes =
           MetricsSystem.meter(MetricKey.CLIENT_CACHE_BYTES_READ_EXTERNAL.getName()).getCount();
-      LOG.info("read: cached {} bytes, missed {} bytes, ratio {}",
-          cachedBytes, missedBytes, 1.0 * cachedBytes / (cachedBytes + missedBytes));
+      LOG.info("read: cached {} bytes, missed {} bytes, ratio {}, requested {} bytes",
+          cachedBytes, missedBytes, 1.0 * cachedBytes / (cachedBytes + missedBytes),
+          requestedBytes);
     }
     final AlluxioURI uri = mPathResolverCache.getUnchecked(path);
     int nread = 0;
