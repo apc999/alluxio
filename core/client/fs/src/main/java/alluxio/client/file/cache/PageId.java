@@ -20,8 +20,8 @@ import javax.annotation.concurrent.ThreadSafe;
  * A class identifies a single cached page.
  */
 @ThreadSafe
-public class PageId {
-  private final String mFileId;
+public final class PageId {
+  private final long mFileId;
   private final long mPageIndex;
 
   /**
@@ -29,6 +29,15 @@ public class PageId {
    * @param pageIndex index of the page in file
    */
   public PageId(String fileId, long pageIndex) {
+    mFileId = Long.valueOf(fileId);
+    mPageIndex = pageIndex;
+  }
+
+  /**
+   * @param fileId file Id
+   * @param pageIndex index of the page in file
+   */
+  public PageId(long fileId, long pageIndex) {
     mFileId = fileId;
     mPageIndex = pageIndex;
   }
@@ -36,7 +45,7 @@ public class PageId {
   /**
    * @return file id
    */
-  public String getFileId() {
+  public long getFileId() {
     return mFileId;
   }
 
@@ -57,11 +66,11 @@ public class PageId {
     if (this == obj) {
       return true;
     }
-    if (!(obj instanceof PageId)) {
+    if (obj.getClass() != PageId.class) {
       return false;
     }
     PageId that = (PageId) obj;
-    return mFileId.equals(that.mFileId) && mPageIndex == that.mPageIndex;
+    return mFileId == that.mFileId && mPageIndex == that.mPageIndex;
   }
 
   @Override

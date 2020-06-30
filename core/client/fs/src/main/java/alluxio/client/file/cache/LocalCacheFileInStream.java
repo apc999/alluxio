@@ -145,7 +145,7 @@ public class LocalCacheFileInStream extends FileInStream {
       int currentPageOffset = (int) (mPosition % mPageSize);
       int bytesLeftInPage =
           (int) Math.min(mPageSize - currentPageOffset, lengthToRead - totalBytesRead);
-      PageId pageId = new PageId(mStatus.getFileIdentifier(), currentPage);
+      PageId pageId = new PageId(mStatus.getFileId(), currentPage);
       int bytesRead =
           mCacheManager.get(pageId, currentPageOffset, bytesLeftInPage, b, off + totalBytesRead);
       if (bytesRead > 0) {
@@ -214,7 +214,7 @@ public class LocalCacheFileInStream extends FileInStream {
       int currentPageOffset = (int) (currentPosition % mPageSize);
       int bytesLeftInPage =
           (int) Math.min(mPageSize - currentPageOffset, lengthToRead - totalBytesRead);
-      PageId pageId = new PageId(mStatus.getFileIdentifier(), currentPage);
+      PageId pageId = new PageId(mStatus.getFileId(), currentPage);
       int bytesRead =
           mCacheManager.get(pageId, currentPageOffset, bytesLeftInPage, b, off + totalBytesRead);
       if (bytesRead > 0) {

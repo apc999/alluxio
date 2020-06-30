@@ -147,10 +147,10 @@ public class RocksPageStore implements PageStore {
   }
 
   private static byte[] getKeyFromPageId(PageId pageId) {
-    byte[] fileId = pageId.getFileId().getBytes();
-    ByteBuffer buf = ByteBuffer.allocate(Long.BYTES + fileId.length);
+    long fileId = pageId.getFileId();
+    ByteBuffer buf = ByteBuffer.allocate(Long.BYTES + Long.BYTES);
     buf.putLong(pageId.getPageIndex());
-    buf.put(fileId);
+    buf.putLong(fileId);
     return buf.array();
   }
 

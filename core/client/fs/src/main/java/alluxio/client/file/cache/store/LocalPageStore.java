@@ -130,11 +130,11 @@ public class LocalPageStore implements PageStore {
   private Path getFilePath(PageId pageId) {
     // TODO(feng): encode fileId with URLEncoder to escape invalid characters for file name
     return Paths.get(mRoot, Long.toString(mPageSize), getFileBucket(pageId.getFileId()),
-        pageId.getFileId(), Long.toString(pageId.getPageIndex()));
+        Long.toString(pageId.getFileId()), Long.toString(pageId.getPageIndex()));
   }
 
-  private String getFileBucket(String fileId) {
-    return Integer.toString(Math.floorMod(fileId.hashCode(), mFileBuckets));
+  private String getFileBucket(long fileId) {
+    return Integer.toString(Math.floorMod((int) fileId, mFileBuckets));
   }
 
   /**
@@ -149,7 +149,7 @@ public class LocalPageStore implements PageStore {
     }
     try {
       String fileBucket = Preconditions.checkNotNull(matcher.group(1));
-      String fileId = Preconditions.checkNotNull(matcher.group(2));
+      long fileId = Long.valueOf(Preconditions.checkNotNull(matcher.group(2)));
       if (!fileBucket.equals(getFileBucket(fileId))) {
         return null;
       }
