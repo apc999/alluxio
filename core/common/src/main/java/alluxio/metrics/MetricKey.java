@@ -348,6 +348,13 @@ public final class MetricKey implements Comparable<MetricKey> {
               + "Use this metric to monitor whether your journal is running out of disk space.")
           .setMetricType(MetricType.GAUGE)
           .build();
+  public static final MetricKey MASTER_RPC_OPS_THROUGHPUT =
+      new Builder("Master.RpcOpsThroughput")
+          .setDescription("Throughput of master UFS operations. This metrics indicates how busy the"
+              + " master is serving client and worker requests")
+          .setMetricType(MetricType.METER)
+          .setIsClusterAggregated(false)
+          .build();
   public static final MetricKey MASTER_TOTAL_PATHS =
       new Builder("Master.TotalPaths")
           .setDescription("Total number of files and directory in Alluxio namespace")
