@@ -20,11 +20,11 @@ import alluxio.metrics.MetricsSystem;
 import alluxio.security.User;
 import alluxio.security.authentication.AuthenticatedClientUser;
 
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import io.grpc.StatusException;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -108,10 +108,10 @@ public final class RpcUtils {
   public static <T> T callAndReturn(Logger logger, RpcCallableThrowsIOException<T> callable,
       String methodName, boolean failureOk, String description, Object... args)
       throws StatusException {
-    Metrics.MASTER_RPC_OPS_THROUGHPUT.mark(1);
     // avoid string format for better performance if debug is off
     String debugDesc = logger.isDebugEnabled() ? String.format(description, args) : null;
-    try (Timer.Context ctx = MetricsSystem.timer(getQualifiedMetricName(methodName)).time()) {
+    try (MetricsSystem.MultiTimerContext ctx = new MetricsSystem.MultiTimerContext(
+        Metrics.TOTAL_RPCS, MetricsSystem.timer(getQualifiedMetricName(methodName)))) {
       MetricsSystem.counter(getQualifiedInProgressMetricName(methodName)).inc();
       logger.debug("Enter: {}: {}", methodName, debugDesc);
       T res = callable.call();
@@ -245,7 +245,7 @@ public final class RpcUtils {
 
   private static final class Metrics {
     /** RPC throughput. */
-    private static final Meter MASTER_RPC_OPS_THROUGHPUT =
-        MetricsSystem.meter(MetricKey.MASTER_RPC_OPS_THROUGHPUT.getName());
+    private static final Timer TOTAL_RPCS =
+        MetricsSystem.timer(MetricKey.MASTER_TOTAL_RPCS.getName());
   }
 }
