@@ -6183,7 +6183,7 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String UNDERFS_HDFS_PREFIXES = "alluxio.underfs.hdfs.prefixes";
     public static final String UNDERFS_HDFS_REMOTE = "alluxio.underfs.hdfs.remote";
     public static final String UNDERFS_LOCAL_SKIP_BROKEN_SYMLINKS =
-        "alluxio.underfs.local.skip.broken.symlinks";
+        "alluxio.underfs.local.skip.broken.symlinks1";
     public static final String UNDERFS_WEB_HEADER_LAST_MODIFIED =
         "alluxio.underfs.web.header.last.modified";
     public static final String UNDERFS_WEB_CONNECTION_TIMEOUT =
