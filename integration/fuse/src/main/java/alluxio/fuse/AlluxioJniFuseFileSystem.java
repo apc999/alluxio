@@ -495,8 +495,19 @@ public final class AlluxioJniFuseFileSystem extends AbstractFuseFileSystem
     int rd = 0;
     final int flags = fi.flags.get();
 
+    SeekableAlluxioFileOutStream stream = null;
     if (mReadWriteOpenFileEntries.get(fd) != null) {
-      SeekableAlluxioFileOutStream stream = mReadWriteOpenFileEntries.get(fd);
+      stream = mReadWriteOpenFileEntries.get(fd);
+    } else {
+      CreateFileEntry<FileOutStream> ce = mCreateFileEntries.getFirstByField(ID_INDEX, fd);
+      if (ce != null) {
+        FileOutStream out = ce.getOut();
+        if (out instanceof SeekableAlluxioFileOutStream) {
+          stream = (SeekableAlluxioFileOutStream) out;
+        }
+      }
+    }
+    if (stream != null) {
       try {
         synchronized (stream) {
           stream.seek(offset);
